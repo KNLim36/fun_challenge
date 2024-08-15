@@ -9,7 +9,7 @@ import (
 )
 
 var alphabets = []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
-var capitalAlphabets = []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
+var capitalAlphabets = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 var digits = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 var file *os.File
 
@@ -67,11 +67,6 @@ func determineAndOutputObjectType(input string) {
 			firstChar := string(firstHalf[i])
 			currentType, isConfirmed = verifyObjectType(firstChar)
 
-			fmt.Println("first half input", input)
-			if input == "ae5hr" {
-				fmt.Println("firstChar", firstChar)
-			}
-
 			if isConfirmed {
 				if shouldOutputToConsole {
 					fmt.Printf("Object: '%s' is %s\n", strings.Trim(input, " "), currentType)
@@ -90,11 +85,6 @@ func determineAndOutputObjectType(input string) {
 		for i := len(secondHalf) - 1; i >= 0; i-- {
 			lastChar := string(secondHalf[i])
 			currentType, isConfirmed = verifyObjectType(lastChar)
-
-			fmt.Println("second half input", input)
-			if input == "ae5hr" {
-				fmt.Println("lastChar", lastChar)
-			}
 
 			if isConfirmed {
 				if shouldOutputToConsole {
