@@ -10,38 +10,47 @@ import (
 	"strings"
 )
 
+// Create a string builder to construct
 var str strings.Builder
 var alphabets = []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
 var digits = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 var alphanumerics = append(alphabets, digits...)
 
 func main() {
+	// // Smaller test sizes for quicker iterations
+	// const (
+	// 	fileSizeLimit = 1024 * 30 // Approximately 30 KB
+	// 	bufferSize    = 4096
+	// )
+
 	// Hard limit for file size: 10 MB = 10 * 1024 KB = 10 * 1024 * 1024 bytes
-	const fileSizeLimit = 10 * 1024 * 1024
-	const bufferSize = 65536
-	// const fileSizeLimit = 1024 * 30
-	// const bufferSize = 4096
+	const (
+		fileSizeLimit = 10 * 1024 * 1024 // 10 MB = 10 * 1024 KB = 10 * 1024 * 1024 bytes
+		bufferSize    = 65536
+	)
+
 	const writeFrequencyNeeded = fileSizeLimit / bufferSize
 	var currentByteCount int = 0
 	var currentWriteFrequency int = 0
 	var data []byte
 
 	// Creates a file first
-	// fileName := filepath.Join("../", "challengeA.txt")
 	fileName := "challengeA.txt"
 	file, errs := os.Create(fileName)
 	if errs != nil {
 		fmt.Println("Failed to create file:", errs)
 		return
 	}
+
+	// Make sure the file closes
 	defer file.Close()
 
 	for {
 		// https://www.kelche.co/blog/go/golang-bufio/
 		writer := bufio.NewWriterSize(file, bufferSize)
 
-		// We build the random object as string
-		object, byteSize := getRandomObject()
+		// We build the random object as byte
+		object, byteSize := getRandObject()
 
 		// and record its byte count (to write in 1 go)
 		currentByteCount += byteSize
@@ -87,58 +96,62 @@ func main() {
 		}
 	}
 
-	fmt.Println("Wrote to file ", fileName, ".")
+	fmt.Println("Wrote to file", fileName, ".")
 }
 
-// Get the random objects in bytes
-func getRandomObject() ([]byte, int) {
-	randMap := map[int]func(expectedLength int) ([]byte, int){
+func getRandObject() ([]byte, int) {
+	// Create a map to associate random index with object generation function
+	randFuncMap := map[int]func(expectedLength int) ([]byte, int){
 		0: getAlphabeticalObject,
 		1: getRealNumberObject,
 		2: getIntegerObject,
 		3: getAlphanumericObjectWithSpace,
 	}
 
-	n := rand.IntN(4)
+	// Pick a function with a random index
+	randomIndex := rand.IntN(len(randFuncMap))
 
 	// We expect the average string length to be 5
 	// e.g. absde, 12345, 1.234, a123d
-	return randMap[n](5)
+	return randFuncMap[randomIndex](5)
 }
 
 func getAlphabeticalObject(expectedLength int) ([]byte, int) {
-	// https://www.educative.io/answers/how-to-use-string-builder-in-golang
+	// Iterate over the desired length of the string
 	for i := 0; i < expectedLength; i++ {
+		// Generate a random index to select a letter from the alphabet
 		index := rand.IntN(len(alphabets))
 
-		// Add in randomizing between small and capital letters
-		if rand.IntN(1) == 1 {
+		// 50% capital letter, 50% small letter
+		if coinFlip() {
 			str.WriteString(strings.ToUpper(alphabets[index]))
 		} else {
 			str.WriteString(alphabets[index])
 		}
 	}
 
-	resultString := str.String()
-	resultLength := str.Len()
+	result, length := getStringAndLengthFromBuilder()
+
+	// Before resetting the str builder
 	str.Reset()
-	return []byte(resultString), resultLength
+
+	// Return the byte slice and its length
+	return []byte(result), length
 }
 
-// Requirement: should contain a random number of spaces before and after it (not exceeding 10 spaces)
-// We constraint the alphanumerical string length to 5 with the front back spaces
+// Get an alphanumeric object with a random number of spaces before and after it
 func getAlphanumericObjectWithSpace(expectedLength int) ([]byte, int) {
-	// minimum 1 space, maximum 10 spaces
+	// Generate a random number of spaces between 1 and 10
 	spaceCount := rand.IntN(10) + 1
 
-	// front space should be less than or equal to spaceCount
+	// Randomly distribute spaces between the beginning and end of the string
 	frontCount := rand.IntN(spaceCount + 1)
 	backCount := spaceCount - frontCount
 
-	for i := 0; i < frontCount; i++ {
-		str.WriteString(" ")
-	}
+	// Add leading spaces
+	addSpaces(frontCount)
 
+	// Generate the alphanumeric part of the string
 	for i := 0; i < expectedLength; i++ {
 		index := rand.IntN(len(alphanumerics))
 		if rand.IntN(1) == 1 {
@@ -148,33 +161,29 @@ func getAlphanumericObjectWithSpace(expectedLength int) ([]byte, int) {
 		}
 	}
 
-	for i := 0; i < backCount; i++ {
-		str.WriteString(" ")
-	}
+	// Add trailing spaces
+	addSpaces(backCount)
 
-	resultString := str.String()
-	resultLength := str.Len()
-
+	// Return the string result as byte and length
+	result, length := getStringAndLengthFromBuilder()
 	str.Reset()
-	return []byte(resultString), resultLength
+	return []byte(result), length
 }
 
-// Real digits can be positive, negative, zero, fractions, decimals and irrational
-// Skipping irrational digits since they have infinite length
-// Skipping zero since it's possible from integers
-// Skipping fractions since they can be represented with decimals
+// Generates a random real number string with a given expected length
 func getRealNumberObject(expectedLength int) ([]byte, int) {
-	// 50% chance to be negative
-	isNegative := rand.IntN(2) == 0
+	// Determine if the number should be negative
+	// isNegative := coinFlip()
+	isNegative := false
 
-	// Check if non-zero showed up
-	var hasNonZero bool = false
-	var hasAddedPeriod bool = false
-	var periodIndex int
+	// Track whether a non-zero digit has been encountered
+	var containsNonZeroDigit bool = false
+
+	// Track whether a decimal point has been added
+	var hasAddedDecimal bool = false
+	var decimalIndex int
 
 	for i := 0; i < expectedLength; i++ {
-		// choose a number from 0 - 9
-		index := rand.IntN(len(digits))
 
 		// [0] write and negative, should add "-"
 		if i == 0 && isNegative {
@@ -182,69 +191,75 @@ func getRealNumberObject(expectedLength int) ([]byte, int) {
 			continue
 		}
 
-		if !hasAddedPeriod {
+		// Handle adding decimal/decimal
+		if !hasAddedDecimal {
 			if isNegative {
-				// If we reach -0* and has no period yet, should add "."
-				if (i == 2 && !hasNonZero) ||
-					// If we reach allowed indexes and has no period yet, roll 50% to add "."
-					(i >= 2 && rand.IntN(2) == 0) ||
-					// If we reach last possible index and has no period yet, should add "."
-					(i == expectedLength-1) {
+
+				/* Explanation:
+				- If we're at the third digit (i == 2) and haven't added a decimal yet, and there's a zero digit before, add a decimal.
+				- If we're past the third digit (i >= 2) and a random coin flip is successful, add a decimal.
+				- If we're at the second-to-last position (i == expectedLength - 2) and haven't added a decimal yet, add one.
+				Why -2 instead of -1? We can't place a decimal at the last place like so: "-012."
+				*/
+				shouldAddDecimal := (i == 2 && !containsNonZeroDigit) || (i >= 2 && coinFlip()) || (i == expectedLength-2)
+				if shouldAddDecimal {
 					str.WriteString(".")
-					hasAddedPeriod = true
-					periodIndex = i
+					hasAddedDecimal = true
+					decimalIndex = i
 					continue
 				}
 			} else {
-				// Only add period to non-first/last indexes
+				// Only add decimal to non-first/last indexes
 				if i != 0 && i != expectedLength-1 {
 
-					// If dice roll successful, or it's already last possible index
-					if (i == 3) || (rand.IntN(2) == 0) {
+					/* Explanation:
+					- If a random coin flip is successful, add a decimal.
+					- If we're at the second-to-last position (i == expectedLength - 2) and haven't added a decimal yet, add one.
+					Why -2 instead of -1? We can't place a decimal at the last place like so: "1234."
+					*/
+					shouldAddDecimal := (coinFlip()) || (i == expectedLength-2)
+					if shouldAddDecimal {
 						str.WriteString(".")
-						hasAddedPeriod = true
-						periodIndex = i
+						hasAddedDecimal = true
+						decimalIndex = i
 						continue
 					}
 				}
 			}
 		}
 
+		// Choose a number from 0 - 9
+		index := rand.IntN(len(digits))
 		str.WriteString(digits[index])
 
+		// Update the containsNonZeroDigit flag if the digit is not zero
 		if index != 0 {
-			hasNonZero = true
+			containsNonZeroDigit = true
 		}
 
 	}
 
-	var resultString string
-	// This is failing for values like 0.086 and -00.7
+	var result string
 
-	// If we generated all 0s, write 0 instead
-	if !hasNonZero {
+	// If we generated all 0s for expectedLength, like 0.000 or -0.00
+	if !containsNonZeroDigit {
 		str.Reset()
-		str.WriteString("0")
+		str.WriteString("0") // Destined to be an integer
 	}
 
-	if isNegative {
-		resultString = str.String()
-		if periodIndex != 2 {
-			resultString = strings.TrimLeft(str.String(), "0")
-		}
-	} else {
-		resultString = str.String()
+	// Get the current string
+	result, _ = getStringAndLengthFromBuilder()
 
-		// If period is at index 1, shouldn't trim left (or 0.2 will be .2)
-		if periodIndex != 1 {
-			resultString = strings.TrimLeft(str.String(), "0")
-		}
+	// If value is positive and the decimal index is not the first possible index
+	// Trim left to convert values like 07.08 -> 7.08
+	if !isNegative && decimalIndex != 1 {
+		result = strings.TrimLeft(result, "0")
 	}
 
-	resultLength := len(resultString)
+	length := len(result)
 	str.Reset()
 
-	return []byte(resultString), resultLength
+	return []byte(result), length
 }
 
 func getIntegerObject(expectedLength int) ([]byte, int) {
@@ -255,7 +270,27 @@ func getIntegerObject(expectedLength int) ([]byte, int) {
 	randomInt := rand.IntN(2*maxValue+1) - maxValue
 
 	// Convert integer to string
-	resultString := strconv.Itoa(randomInt)
+	result := strconv.Itoa(randomInt)
 
-	return []byte(resultString), len(resultString)
+	return []byte(result), len(result)
+}
+
+// Returns a boolean value, simulating a coin flip (true or false with equal probability
+func coinFlip() bool {
+	return rand.IntN(2) == 0
+}
+
+// Adds a specified number of spaces to the string builder
+func addSpaces(count int) {
+	for i := 0; i < count; i++ {
+		str.WriteString(" ")
+	}
+}
+
+// Converts the string builder to a string and returns it along with its length
+func getStringAndLengthFromBuilder() (string, int) {
+	result := str.String()
+	length := str.Len()
+
+	return result, length
 }
