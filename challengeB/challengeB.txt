@@ -1,0 +1,65 @@
+Object: '73.10' is real number
+Object: 'akcue5' is alphanumerical
+Object: '-7991' is integer
+Object: '7037' is integer
+Object: 'devr6' is alphanumerical
+Object: '98.94' is real number
+Object: '-3117' is integer
+Object: 'jQUsp' is alphabet
+Object: '9.807' is real number
+Object: 'dKucJ' is alphabet
+Object: 'TLFrL' is alphabet
+Object: 'e6t9c' is alphanumerical
+Object: '-9914' is integer
+Object: 'eqpk5' is alphanumerical
+Object: '8755' is integer
+Object: 'wi2wz' is alphanumerical
+Object: 'bubZU' is Unknown
+Object: 'fsxa5' is alphanumerical
+Object: '4325' is integer
+Object: '1246' is integer
+Object: '-8057' is integer
+Object: 'TfdiO' is alphabet
+Object: '671.1' is real number
+Object: '1229' is integer
+Object: '9444' is integer
+Object: '9441' is integer
+Object: 'cihqn5' is alphanumerical
+Object: '9227' is integer
+Object: '-7272' is integer
+Object: '2zgmx' is alphanumerical
+Object: 'FsOZU' is Unknown
+Object: '4.540' is real number
+Object: 'ga9b8' is alphanumerical
+Object: 'HjvKH' is Unknown
+Object: 'jc8et' is alphanumerical
+Object: 'gbVUy' is Unknown
+Object: '77lvb' is alphanumerical
+Object: '-6824' is integer
+Object: '9.65' is real number
+Object: 'VAjgb' is alphabet
+Object: 'HlZlB' is alphabet
+Object: 'ScgMq' is Unknown
+Object: '-9499' is integer
+Object: '5106' is integer
+Object: 'KNvQZ' is Unknown
+Object: '83.60' is real number
+Object: '1813' is integer
+Object: '8v46i' is alphanumerical
+Object: 'XqRrp' is alphabet
+Object: 'aDWjF' is alphabet
+Object: 'YVRse' is alphabet
+Object: '-4597' is integer
+Object: 'durhs' is alphabet
+Object: 'hFNJD' is Unknown
+Object: '40.1' is real number
+Object: 'QxktP' is alphabet
+Object: 'hx89s' is alphanumerical
+Object: '7.49' is real number
+Object: '6494' is integer
+Object: '63.49' is real number
+Object: 'MhAvh' is alphabet
+Object: '9.045' is real number
+Object: '9ivof' is alphanumerical
+Object: '-4486' is integer
+Object: 'ae5hr' is alphanumerical

@@ -16,20 +16,21 @@ var alphabets = []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", 
 var digits = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 var alphanumerics = append(alphabets, digits...)
 
+// // Smaller test sizes for quicker iterations
+// const (
+// 	fileSizeLimit = 1024 * 30 // Approximately 30 KB
+// 	bufferSize    = 4096
+// )
+
+// Hard limit for file size: 10 MB = 10 * 1024 KB = 10 * 1024 * 1024 bytes
+const (
+	fileSizeLimit = 10 * 1024 * 1024 // 10 MB = 10 * 1024 KB = 10 * 1024 * 1024 bytes
+	bufferSize    = 65536
+)
+
+const writeFrequencyNeeded = fileSizeLimit / bufferSize
+
 func main() {
-	// // Smaller test sizes for quicker iterations
-	// const (
-	// 	fileSizeLimit = 1024 * 30 // Approximately 30 KB
-	// 	bufferSize    = 4096
-	// )
-
-	// Hard limit for file size: 10 MB = 10 * 1024 KB = 10 * 1024 * 1024 bytes
-	const (
-		fileSizeLimit = 10 * 1024 * 1024 // 10 MB = 10 * 1024 KB = 10 * 1024 * 1024 bytes
-		bufferSize    = 65536
-	)
-
-	const writeFrequencyNeeded = fileSizeLimit / bufferSize
 	var currentByteCount int = 0
 	var currentWriteFrequency int = 0
 	var data []byte
@@ -122,7 +123,7 @@ func getAlphabeticalObject(expectedLength int) ([]byte, int) {
 		// Generate a random index to select a letter from the alphabet
 		index := rand.IntN(len(alphabets))
 
-		// 50% capital letter, 50% small letter
+		// 50% upper case, 50% lower case
 		if coinFlip() {
 			str.WriteString(strings.ToUpper(alphabets[index]))
 		} else {
@@ -151,14 +152,46 @@ func getAlphanumericObjectWithSpace(expectedLength int) ([]byte, int) {
 	// Add leading spaces
 	addSpaces(frontCount)
 
+	hasDigit := false
+	hasAlphabet := false
+
 	// Generate the alphanumeric part of the string
 	for i := 0; i < expectedLength; i++ {
 		index := rand.IntN(len(alphanumerics))
-		if rand.IntN(1) == 1 {
-			str.WriteString(strings.ToUpper(alphanumerics[index]))
-		} else {
-			str.WriteString(alphanumerics[index])
+
+		// This is used to check if an alphabet or digit is getting created
+		isAlphabet := index <= len(alphabets)-1
+		isDigit := index >= len(alphabets)
+
+		if isAlphabet {
+			hasAlphabet = true
+			// Coin flip to upper case
+			if rand.IntN(1) == 1 {
+				str.WriteString(strings.ToUpper(alphanumerics[index]))
+			} else {
+				str.WriteString(alphanumerics[index])
+			}
+			continue
 		}
+
+		if isDigit {
+			hasDigit = true
+			str.WriteString(alphanumerics[index])
+			continue
+		}
+
+	}
+
+	if !hasAlphabet {
+		// Do something to make sure we add alphabet
+		index := rand.IntN(len(alphabets))
+		str.WriteString(alphabets[index]) // Adding in random alphabet
+	}
+
+	if !hasDigit {
+		// Do something to make sure we add digit
+		index := rand.IntN(len(digits))
+		str.WriteString(digits[index]) // Adding in random digit
 	}
 
 	// Add trailing spaces
