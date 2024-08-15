@@ -122,20 +122,20 @@ func verifyObjectType(input string) (objectType string, isConfirmed bool) {
 
 	// If it has a decimal, definitely real numbers
 	if input == "." {
-		return "real number", true
+		return "real", true
 	}
 
 	// If it has alphabets (small or capital), definitely alphabets (since alphanumerics are out)
 	if containsString(alphabets, input) || containsString(capitalAlphabets, input) {
-		return "alphabet", false
+		return "alphabetical", false
 	}
 
 	// If it has digits, might be an integer, might be a real number
 	if containsString(digits, input) {
-		return "integer", false
+		return "integral", false
 	}
 
-	return "Unknown", false
+	return "unknown", false
 }
 
 func containsString(haystack []string, needle string) bool {
